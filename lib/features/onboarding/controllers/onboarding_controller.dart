@@ -14,6 +14,9 @@ class OnboardingController extends GetxController {
     }
 
     final teamId = await teamService.createTeam(name, user.uid);
+    final teamDoc = await FirebaseFirestore.instance.collection('teams').doc(teamId).get();
+    final teamCode = teamDoc.data()?['code'] ?? '';
+    Get.defaultDialog(title: 'Team aangemaakt', middleText: 'Deel deze code met je team: \$teamCode');
     // TODO: gebruiker koppelen aan team
     Get.offAllNamed('/home');
   }
