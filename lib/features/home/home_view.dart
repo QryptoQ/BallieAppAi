@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'event_detail_view.dart';
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
