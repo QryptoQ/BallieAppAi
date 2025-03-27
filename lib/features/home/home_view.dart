@@ -45,8 +45,9 @@ class HomeView extends StatelessWidget {
               ? (event['date'] as Timestamp).toDate().toLocal().toString()
               : 'Datum onbekend';
 
-          return Center(
-            child: Column(
+          return Column(
+          children: [
+            Expanded(child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text('Volgende activiteit: ${event['type'] ?? 'Onbekend'}',
