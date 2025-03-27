@@ -32,7 +32,19 @@ List<String> positions = ['Keeper', 'Verdediger', 'Middenveld', 'Spits'];
                   itemCount: players.length,
                   itemBuilder: (context, index) {
                     final data = players[index].data() as Map<String, dynamic>;
-                    return ListTile(
+                    final playerId = data['playerId'];
+                      return FutureBuilder<DocumentSnapshot>(
+                        future: FirebaseFirestore.instance.collection('users').doc(playerId).get(),
+                        builder: (context, snapshot) {
+                          final playerName = snapshot.data?.data() != null
+                              ? (snapshot.data!.data() as Map<String, dynamic>)['name'] ?? 'Naamloos'
+                              : 'Laden...';
+                          return ListTile(
+                            title: Text(playerName),
+                            subtitle: Text(data['position'] ?? 'Positie'),
+                          );
+                        },
+                      );
                       title: Text(data['name'] ?? 'Naamloos'),
                       subtitle: Text(data['position'] ?? 'Positie'),
                     );
