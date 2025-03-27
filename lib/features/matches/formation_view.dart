@@ -42,7 +42,9 @@ class FormationView extends StatelessWidget {
             }
           }
 
-          return Column(
+          return Container(
+          color: Colors.green[100],
+          child: Column(
             children: [
               for (final pos in ['Spits', 'Middenveld', 'Verdediger', 'Keeper'])
                 Expanded(
@@ -59,10 +61,15 @@ class FormationView extends StatelessWidget {
                                   margin: const EdgeInsets.all(8),
                                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                   decoration: BoxDecoration(
-                                    color: Colors.green[300],
+                                    color: Colors.green[700],
                                     borderRadius: BorderRadius.circular(12),
                                   ),
-                                  child: Text(name),
+                                  child: Text(name,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.white,
+                                        ),
+                                      ),
                                 ))
                             .toList(),
                       )
