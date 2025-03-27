@@ -1,0 +1,30 @@
+
+# Flutter/Dart/Pub related
+.dart_tool/
+.packages
+.pub-cache/
+build/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+.flutter-plugins
+.flutter-plugins-dependencies
+.melos_tool/
+.idea/
+.vscode/
+
+# Firebase
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+
+# macOS
+macos/Flutter/ephemeral/
+
+# Web
+web/generated_plugin_registrant.dart
+
+# Others
+*.iml
+*.lock
+*.log
+*.tmp
+*.DS_Store
