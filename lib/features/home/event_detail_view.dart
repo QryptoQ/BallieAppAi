@@ -44,9 +44,20 @@ class EventDetailView extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 32),
                 const Text('Stem op MVP', style: TextStyle(fontSize: 18)),
+                FutureBuilder<String?>(
+                  future: getTopVotedPlayer(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData || snapshot.data == null) {
+                      return const Text('Nog geen stemmen uitgebracht');
+                    }
+                    return Text('Meest gestemd: \${snapshot.data}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500));
+                  },
+                ),
+                const SizedBox(height: 8),
                 const SizedBox(height: 8),
                 ElevatedButton(
                   onPressed: () async {
@@ -100,6 +111,16 @@ class EventDetailView extends StatelessWidget {
                   children: [
                 const SizedBox(height: 32),
                 const Text('Stem op MVP', style: TextStyle(fontSize: 18)),
+                FutureBuilder<String?>(
+                  future: getTopVotedPlayer(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData || snapshot.data == null) {
+                      return const Text('Nog geen stemmen uitgebracht');
+                    }
+                    return Text('Meest gestemd: \${snapshot.data}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500));
+                  },
+                ),
+                const SizedBox(height: 8),
                 const SizedBox(height: 8),
                 ElevatedButton(
                   onPressed: () async {
@@ -161,3 +182,31 @@ class EventDetailView extends StatelessWidget {
     );
   }
 }
+
+
+  Future<String?> getTopVotedPlayer() async {
+    final votes = await FirebaseFirestore.instance
+        .collection('events')
+        .doc(eventId)
+        .collection('mvp_votes')
+        .get();
+
+    if (votes.docs.isEmpty) return null;
+
+    final Map<String, int> voteCount = {};
+    for (var doc in votes.docs) {
+      final votedId = doc.data()['vote'];
+      if (votedId != null) {
+        voteCount[votedId] = (voteCount[votedId] ?? 0) + 1;
+      }
+    }
+
+    final topVote = voteCount.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    if (topVote.isEmpty) return null;
+
+    final playerId = topVote.first.key;
+    final playerDoc = await FirebaseFirestore.instance.collection('users').doc(playerId).get();
+    return playerDoc.data()?['name'] ?? 'Onbekend';
+  }
