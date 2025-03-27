@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'formation_controller.dart';
 
 class FormationView extends StatelessWidget {
   final String matchId;
@@ -42,7 +43,24 @@ class FormationView extends StatelessWidget {
             }
           }
 
-          return Container(
+          final controller = FormationController();
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ElevatedButton.icon(
+                  onPressed: () async {
+                    await controller.saveFormation(matchId);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Opstelling opgeslagen als formatie')),
+                    );
+                  },
+                  icon: const Icon(Icons.save),
+                  label: const Text('Formatie opslaan'),
+                ),
+              ),
+              Expanded(
+                child: Container(
           color: Colors.green[100],
           child: Column(
             children: [
