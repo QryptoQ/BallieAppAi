@@ -28,10 +28,15 @@ class FormationView extends StatelessWidget {
             'Spits': [],
           };
 
-          for (var doc in lineup) {
+          for (var doc in lineup) async {
             final data = doc.data() as Map<String, dynamic>;
             final pos = data['position'] ?? 'Onbekend';
-            final name = data['name'] ?? data['playerId'] ?? 'Naamloos';
+            final playerId = data['playerId'];
+            String name = data['name'] ?? 'Naamloos';
+            if (playerId != null) {
+              final userSnap = await FirebaseFirestore.instance.collection('users').doc(playerId).get();
+              name = userSnap.data()?['name'] ?? 'Naamloos';
+            }
             if (positionGroups.containsKey(pos)) {
               positionGroups[pos]!.add(name);
             }
@@ -47,6 +52,8 @@ class FormationView extends StatelessWidget {
                       Text(pos, style: const TextStyle(fontWeight: FontWeight.bold)),
                       Wrap(
                         alignment: WrapAlignment.center,
+                        spacing: 8,
+                        runSpacing: 4,
                         children: positionGroups[pos]!
                             .map((name) => Container(
                                   margin: const EdgeInsets.all(8),
