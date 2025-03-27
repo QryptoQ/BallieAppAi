@@ -4,6 +4,7 @@ import 'features/auth/views/login_view.dart';
 import 'features/auth/views/register_view.dart';
 import 'features/home/home_view.dart';
 import 'features/onboarding/views/welcome_view.dart';
+import 'features/onboarding/views/create_team_view.dart';
 
 class AppRoutes {
   static const initial = '/login';
@@ -15,7 +16,7 @@ class AppRoutes {
     ),
     GetPage(
       name: '/create-team',
-      page: () => const Placeholder(), // wordt vervangen
+      page: () => const CreateTeamView()
     ),
     GetPage(
       name: '/join-team',
@@ -31,7 +32,7 @@ class AppRoutes {
     ),
     GetPage(
       name: '/create-team',
-      page: () => const Placeholder(), // wordt vervangen
+      page: () => const CreateTeamView()
     ),
     GetPage(
       name: '/join-team',
@@ -47,7 +48,7 @@ class AppRoutes {
     ),
     GetPage(
       name: '/create-team',
-      page: () => const Placeholder(), // wordt vervangen
+      page: () => const CreateTeamView()
     ),
     GetPage(
       name: '/join-team',
@@ -63,7 +64,7 @@ class AppRoutes {
     ),
     GetPage(
       name: '/create-team',
-      page: () => const Placeholder(), // wordt vervangen
+      page: () => const CreateTeamView()
     ),
     GetPage(
       name: '/join-team',
