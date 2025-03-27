@@ -10,6 +10,9 @@ class LineupView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final TextEditingController playerController = TextEditingController();
+String? selectedPlayerId;
+String? selectedPosition;
+List<String> positions = ['Keeper', 'Verdediger', 'Middenveld', 'Spits'];
 
     return Scaffold(
       appBar: AppBar(title: const Text('Opstelling')),
@@ -42,18 +45,44 @@ class LineupView extends StatelessWidget {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
-                TextField(
-                  controller: playerController,
+                FutureBuilder<QuerySnapshot>(
+                  future: FirebaseFirestore.instance.collection('users').get(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) return const CircularProgressIndicator();
+                    final players = snapshot.data!.docs;
+                    return DropdownButtonFormField<String>(
+                      value: selectedPlayerId,
+                      hint: const Text('Selecteer speler'),
+                      items: players.map((doc) {
+                        return DropdownMenuItem(
+                          value: doc.id,
+                          child: Text(doc['name'] ?? 'Naamloos'),
+                        );
+                      }).toList(),
+                      onChanged: (value) => selectedPlayerId = value,
+                    );
+                  },
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String>(
+                  value: selectedPosition,
+                  hint: const Text('Selecteer positie'),
+                  items: positions.map((pos) {
+                    return DropdownMenuItem(value: pos, child: Text(pos));
+                  }).toList(),
+                  onChanged: (value) => selectedPosition = value,
+                ),
                   decoration: const InputDecoration(labelText: 'Naam speler (testinput)'),
                 ),
                 const SizedBox(height: 12),
                 ElevatedButton(
                   onPressed: () async {
+                    if (selectedPlayerId != null && selectedPosition != null) {
                     await FirebaseFirestore.instance
                         .collection('matches')
                         .doc(matchId)
                         .collection('lineup')
-                        .add({'name': playerController.text, 'position': 'Spits'});
+                        .add({'playerId': selectedPlayerId, 'position': selectedPosition});
                     playerController.clear();
                   },
                   child: const Text('Speler toevoegen'),
