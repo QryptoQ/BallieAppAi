@@ -40,6 +40,17 @@ List<String> positions = ['Keeper', 'Verdediger', 'Middenveld', 'Spits'];
                               ? (snapshot.data!.data() as Map<String, dynamic>)['name'] ?? 'Naamloos'
                               : 'Laden...';
                           return ListTile(
+                      onLongPress: () async {
+                        await FirebaseFirestore.instance
+                            .collection('matches')
+                            .doc(matchId)
+                            .collection('lineup')
+                            .doc(players[index].id)
+                            .delete();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Speler verwijderd uit opstelling')),
+                        );
+                      },
                             title: Text(playerName),
                             subtitle: Text(data['position'] ?? 'Positie'),
                           );
