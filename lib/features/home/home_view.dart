@@ -35,7 +35,9 @@ class HomeView extends StatelessWidget {
               children: [
                 Text('Welkom bij $teamName!', style: const TextStyle(fontSize: 20)),
                 const SizedBox(height: 24),
-                const Text('⚽ Hier komt het programma en aanwezigheidsoverzicht'),
+                const Text('📅 Volgende activiteit'),
+                const Text('Training – zaterdag 10:00'),
+                const Text('Locatie: Veld 3'),
               ],
             ),
           );
