@@ -6,7 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
 
-  Future<String?> getTeamName() async {
+  Future<Map<String, dynamic>?> getNextEventData() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return null;
 
@@ -14,30 +14,46 @@ class HomeView extends StatelessWidget {
     final teamId = userDoc.data()?['teamId'];
     if (teamId == null) return null;
 
-    final teamDoc = await FirebaseFirestore.instance.collection('teams').doc(teamId).get();
-    return teamDoc.data()?['name'] ?? 'Team zonder naam';
+    final eventsQuery = await FirebaseFirestore.instance
+        .collection('events')
+        .where('teamId', isEqualTo: teamId)
+        .orderBy('date')
+        .limit(1)
+        .get();
+
+    if (eventsQuery.docs.isEmpty) return null;
+    return eventsQuery.docs.first.data();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Home')),
-      body: FutureBuilder<String?>(
-        future: getTeamName(),
+      body: FutureBuilder<Map<String, dynamic>?>(
+        future: getNextEventData(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-          final teamName = snapshot.data ?? 'Onbekend team';
+
+          if (!snapshot.hasData || snapshot.data == null) {
+            return const Center(child: Text('Geen aankomend programma'));
+          }
+
+          final event = snapshot.data!;
+          final date = event['date'] != null
+              ? (event['date'] as Timestamp).toDate().toLocal().toString()
+              : 'Datum onbekend';
+
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Welkom bij $teamName!', style: const TextStyle(fontSize: 20)),
-                const SizedBox(height: 24),
-                const Text('📅 Volgende activiteit'),
-                const Text('Training – zaterdag 10:00'),
-                const Text('Locatie: Veld 3'),
+                Text('Volgende activiteit: ${event['type'] ?? 'Onbekend'}',
+                    style: const TextStyle(fontSize: 18)),
+                const SizedBox(height: 12),
+                Text('Datum: $date'),
+                if (event['location'] != null) Text('Locatie: ${event['location']}'),
               ],
             ),
           );
