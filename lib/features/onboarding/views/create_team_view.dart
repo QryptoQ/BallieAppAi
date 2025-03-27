@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../controllers/onboarding_controller.dart';
 
 class CreateTeamView extends StatelessWidget {
   const CreateTeamView({super.key});
@@ -8,6 +9,7 @@ class CreateTeamView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final nameController = TextEditingController();
+    final controller = Get.put(OnboardingController());
 
     return Scaffold(
       appBar: AppBar(title: const Text('Team aanmaken')),
@@ -24,10 +26,8 @@ class CreateTeamView extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: () {
-                // TODO: Team aanmaken logica koppelen
-                Get.snackbar('Team aangemaakt', 'Team: \${nameController.text}');
-                Get.offAllNamed('/home');
+              onPressed: () async {
+                await controller.createTeam(nameController.text.trim());
               },
               child: const Text('Team aanmaken'),
             ),
