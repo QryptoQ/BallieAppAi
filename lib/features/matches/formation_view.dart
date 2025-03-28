@@ -39,7 +39,9 @@ class FormationView extends StatelessWidget {
               name = userSnap.data()?['name'] ?? 'Naamloos';
             }
             if (positionGroups.containsKey(pos)) {
+              if (!positionGroups[pos]!.contains(name)) {
               positionGroups[pos]!.add(name);
+            }
             }
           }
 
@@ -76,6 +78,20 @@ class FormationView extends StatelessWidget {
                         runSpacing: 4,
                         children: positionGroups[pos]!
                             .map((name) => Container(
+                                  margin: const EdgeInsets.all(8),
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: name == 'Naamloos' ? Colors.grey : Colors.green[700],
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    name == 'Naamloos' ? 'Lege plek' : name,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ))
                                   margin: const EdgeInsets.all(8),
                                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                   decoration: BoxDecoration(
