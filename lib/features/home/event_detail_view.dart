@@ -3,48 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../../core/services/reminder_service.dart';
 
-class EventDetailView extends StatefulWidget {
+// ignore_for_file: use_build_context_synchronously
+
+class EventDetailView extends StatelessWidget {
   final String eventId;
 
   const EventDetailView({super.key, required this.eventId});
 
-  @override
-  State<EventDetailView> createState() => _EventDetailViewState();
-}
-
-class _EventDetailViewState extends State<EventDetailView> {
-  bool _reminderActive = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadReminderStatus();
-  }
-
-  Future<void> _loadReminderStatus() async {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid == null) return;
-    final isActive = await ReminderService().hasReminder(widget.eventId, uid);
-    setState(() {
-      _reminderActive = isActive;
-    });
-  }
-
-  Future<void> _toggleReminder() async {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid == null) return;
-    if (_reminderActive) {
-      await ReminderService().removeReminder(widget.eventId, uid);
-    } else {
-      await ReminderService().addReminder(widget.eventId, uid);
-    }
-    _loadReminderStatus();
-  }
-
   Future<Map<String, dynamic>?> getEventData() async {
-    final doc = await FirebaseFirestore.instance.collection('events').doc(widget.eventId).get();
+    final doc = await FirebaseFirestore.instance.collection('events').doc(eventId).get();
     return doc.exists ? doc.data() : null;
   }
 
@@ -53,7 +21,7 @@ class _EventDetailViewState extends State<EventDetailView> {
     if (uid == null) return;
     await FirebaseFirestore.instance
         .collection('events')
-        .doc(widget.eventId)
+        .doc(eventId)
         .collection('attendees')
         .doc(uid)
         .set({'attending': attending});
@@ -63,43 +31,146 @@ class _EventDetailViewState extends State<EventDetailView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Event Details'),
-        actions: [
-          IconButton(
-            icon: Icon(_reminderActive ? Icons.notifications_active : Icons.notifications_none),
-            onPressed: _toggleReminder,
-            tooltip: _reminderActive ? 'Reminder uitzetten' : 'Reminder aanzetten',
-          ),
-        ],
-      ),
+      appBar: AppBar(title: const Text('Evenement detail')),
       body: FutureBuilder<Map<String, dynamic>?>(
         future: getEventData(),
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
-          if (!snapshot.hasData) return const Center(child: Text('Event niet gevonden'));
+          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
           final data = snapshot.data!;
+          final date = data['date'] != null
+              ? (data['date'] as Timestamp).toDate().toLocal().toString()
+              : 'Onbekende datum';
           return Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(data['title'] ?? '', style: Theme.of(context).textTheme.headlineSmall),
+                const SizedBox(height: 32),
+                const Text('Stem op MVP', style: TextStyle(fontSize: 18)),
+                FutureBuilder<String?>(
+                  future: getTopVotedPlayer(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData || snapshot.data == null) {
+                      return const Text('Nog geen stemmen uitgebracht');
+                    }
+                    return Text('Meest gestemd: \${snapshot.data}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500));
+                  },
+                ),
+                const SizedBox(height: 8),
+                const SizedBox(height: 8),
+                ElevatedButton(
+                  onPressed: () async {
+                    final playersSnapshot = await FirebaseFirestore.instance.collection('users').get();
+                    final players = playersSnapshot.docs;
+
+                    final selected = await showDialog<String>(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: const Text('Kies speler'),
+                          content: SizedBox(
+                            width: double.maxFinite,
+                            child: ListView.builder(
+                              shrinkWrap: true,
+                              itemCount: players.length,
+                              itemBuilder: (context, index) {
+                                final player = players[index];
+                                return ListTile(
+                                  title: Text(player.data()['name'] ?? 'Naamloos'),
+                                  onTap: () => Navigator.of(context).pop(player.id),
+                                );
+                              },
+                            ),
+                          ),
+                        );
+                      },
+                    );
+
+                    if (selected != null) {
+                      final uid = FirebaseAuth.instance.currentUser?.uid;
+                      await FirebaseFirestore.instance
+                          .collection('events')
+                          .doc(eventId)
+                          .collection('mvp_votes')
+                          .doc(uid)
+                          .set({'vote': selected});
+                      Get.snackbar('MVP stem opgeslagen', 'Je hebt succesvol gestemd');
+                    }
+                  },
+                  child: const Text('Breng stem uit'),
+                ),
+                Text(data['type'] ?? 'Onbekend', style: const TextStyle(fontSize: 24)),
+                const SizedBox(height: 8),
+                Text('Datum: $date'),
+                if (data['location'] != null) Text('Locatie: ${data['location']}'),
+                const SizedBox(height: 32),
+                const Text('Ben je erbij?', style: TextStyle(fontSize: 18)),
                 const SizedBox(height: 12),
-                Text(data['description'] ?? ''),
-                const SizedBox(height: 24),
                 Row(
                   children: [
-                    ElevatedButton.icon(
-                      icon: const Icon(Icons.check),
-                      label: const Text('Aanwezig'),
+                const SizedBox(height: 32),
+                const Text('Stem op MVP', style: TextStyle(fontSize: 18)),
+                FutureBuilder<String?>(
+                  future: getTopVotedPlayer(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData || snapshot.data == null) {
+                      return const Text('Nog geen stemmen uitgebracht');
+                    }
+                    return Text('Meest gestemd: \${snapshot.data}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500));
+                  },
+                ),
+                const SizedBox(height: 8),
+                const SizedBox(height: 8),
+                ElevatedButton(
+                  onPressed: () async {
+                    final playersSnapshot = await FirebaseFirestore.instance.collection('users').get();
+                    final players = playersSnapshot.docs;
+
+                    final selected = await showDialog<String>(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: const Text('Kies speler'),
+                          content: SizedBox(
+                            width: double.maxFinite,
+                            child: ListView.builder(
+                              shrinkWrap: true,
+                              itemCount: players.length,
+                              itemBuilder: (context, index) {
+                                final player = players[index];
+                                return ListTile(
+                                  title: Text(player.data()['name'] ?? 'Naamloos'),
+                                  onTap: () => Navigator.of(context).pop(player.id),
+                                );
+                              },
+                            ),
+                          ),
+                        );
+                      },
+                    );
+
+                    if (selected != null) {
+                      final uid = FirebaseAuth.instance.currentUser?.uid;
+                      await FirebaseFirestore.instance
+                          .collection('events')
+                          .doc(eventId)
+                          .collection('mvp_votes')
+                          .doc(uid)
+                          .set({'vote': selected});
+                      Get.snackbar('MVP stem opgeslagen', 'Je hebt succesvol gestemd');
+                    }
+                  },
+                  child: const Text('Breng stem uit'),
+                ),
+                    ElevatedButton(
                       onPressed: () => updateAttendance(true),
+                      child: const Text('Ja'),
                     ),
                     const SizedBox(width: 12),
-                    ElevatedButton.icon(
-                      icon: const Icon(Icons.close),
-                      label: const Text('Afwezig'),
+                    OutlinedButton(
                       onPressed: () => updateAttendance(false),
+                      child: const Text('Nee'),
                     ),
                   ],
                 ),
@@ -111,3 +182,31 @@ class _EventDetailViewState extends State<EventDetailView> {
     );
   }
 }
+
+
+  Future<String?> getTopVotedPlayer() async {
+    final votes = await FirebaseFirestore.instance
+        .collection('events')
+        .doc(eventId)
+        .collection('mvp_votes')
+        .get();
+
+    if (votes.docs.isEmpty) return null;
+
+    final Map<String, int> voteCount = {};
+    for (var doc in votes.docs) {
+      final votedId = doc.data()['vote'];
+      if (votedId != null) {
+        voteCount[votedId] = (voteCount[votedId] ?? 0) + 1;
+      }
+    }
+
+    final topVote = voteCount.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    if (topVote.isEmpty) return null;
+
+    final playerId = topVote.first.key;
+    final playerDoc = await FirebaseFirestore.instance.collection('users').doc(playerId).get();
+    return playerDoc.data()?['name'] ?? 'Onbekend';
+  }
