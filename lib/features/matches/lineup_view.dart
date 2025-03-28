@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'formation_view.dart';
+import 'formation_list_view.dart';
 
 class LineupView extends StatelessWidget {
   final String matchId;
@@ -69,6 +70,16 @@ List<String> positions = ['Keeper', 'Verdediger', 'Middenveld', 'Spits'];
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => FormationListView(matchId: matchId),
+                    ));
+                  },
+                  icon: const Icon(Icons.list_alt),
+                  label: const Text('Kies opgeslagen formatie'),
+                ),
+                const SizedBox(height: 12),
                 ElevatedButton(
                   onPressed: () {
                     Navigator.of(context).push(MaterialPageRoute(
