@@ -1,13 +1,4 @@
 
-// UI polish toegepast:
-// - Spacing gestandaardiseerd
-// - Buttons gestyled naar ElevatedButton / OutlinedButton
-// - Teksten omgezet naar .tr
-// - Consistente kleuren en paddings toegepast
-// - Tekstvelden voorzien van hintText met .tr
-// - Responsiviteit verbeterd voor kleinere schermen
-
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/auth_controller.dart';
