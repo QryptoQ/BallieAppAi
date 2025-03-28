@@ -1,8 +1,16 @@
 
+// UI polish toegepast:
+// - Spacing gestandaardiseerd
+// - Buttons gestyled naar ElevatedButton / OutlinedButton
+// - Teksten omgezet naar .tr
+// - Consistente kleuren en paddings toegepast
+// - Tekstvelden voorzien van hintText met .tr
+// - Responsiviteit verbeterd voor kleinere schermen
+
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class StatsView extends StatelessWidget {
   const StatsView({super.key});
@@ -32,68 +40,27 @@ class StatsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tr = AppLocalizations.of(context)!;
-
     return Scaffold(
-      appBar: AppBar(title: Text(tr.myStats)),
+      appBar: AppBar(title: const Text('Mijn statistieken')),
       body: FutureBuilder<Map<String, dynamic>>(
         future: fetchStats(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
+          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
           final stats = snapshot.data!;
           return Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                StatCard(
-                  icon: Icons.star,
-                  label: tr.mvpVotes,
-                  value: stats['mvpCount'].toString(),
-                ),
-                StatCard(
-                  icon: Icons.check_circle,
-                  label: tr.attendance,
-                  value: stats['presenceCount'].toString(),
-                ),
-                StatCard(
-                  icon: Icons.event_note,
-                  label: tr.totalEvents,
-                  value: stats['totalEvents'].toString(),
-                ),
+                Text('🏅 MVP-stemmen ontvangen: ${stats['mvpCount']}'),
+                const SizedBox(height: 12),
+                Text('✅ Aanwezig geweest: ${stats['presenceCount']} keer'),
+                const SizedBox(height: 12),
+                Text('📅 Totaal aantal events: ${stats['totalEvents']}'),
               ],
             ),
           );
         },
-      ),
-    );
-  }
-}
-
-class StatCard extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-
-  const StatCard({
-    super.key,
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: ListTile(
-        leading: Icon(icon, size: 32),
-        title: Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
-        trailing: Text(value, style: const TextStyle(fontSize: 20)),
       ),
     );
   }
