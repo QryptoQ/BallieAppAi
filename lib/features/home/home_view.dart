@@ -32,6 +32,7 @@ class HomeView extends StatelessWidget {
       appBar: AppBar(title: const Text('Home')),
       body: FutureBuilder<Map<String, dynamic>?>(
         future: getNextEventData(),
+        future: getNextEventData(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -42,6 +43,7 @@ class HomeView extends StatelessWidget {
           }
 
           final event = snapshot.data!;
+            final hasReminder = event['reminder'] == true;
           final date = event['date'] != null
               ? (event['date'] as Timestamp).toDate().toLocal().toString()
               : 'Datum onbekend';
